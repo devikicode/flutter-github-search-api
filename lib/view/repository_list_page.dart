@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:github_search/domain/repository.dart';
+
+Future<List<Repository>> _getRepositories() async {
+  final dio = new Dio();
+  final response = await dio.get(
+      'https://api.github.com/search/repositories?q=flutter&sort=stars&order=desc');
+  List<Repository> list = new List();
+  for (int i = 0; i < response.data['items'].length; i++) {
+    list.add(Repository.fromJson(response.data['items'][i]));
+  }
+  return list;
+}
 
 class RepositoryListPage extends StatefulWidget {
-
   RepositoryListPage({Key key}) : super(key: key);
 
   @override
@@ -9,56 +21,115 @@ class RepositoryListPage extends StatefulWidget {
 }
 
 class _RepositoryListPageState extends State<RepositoryListPage> {
+  Future<List<Repository>> repositories;
+
+  @override
+  void initState() {
+    super.initState();
+    repositories = _getRepositories();
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    return new Scaffold(
-      appBar: AppBar(
-        title: Text("Title"),
-      ),
-      body: ListView.builder(
-        itemBuilder: (_, int index) => RepositoryItem(),
-        itemCount: 10,
-      ),
-    );
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Flutter Repos"),
+          leading: IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: () {
+                setState(() {
+                  repositories = _getRepositories();
+                });
+              }),
+        ),
+        body: FutureBuilder<List<Repository>>(
+          future: repositories,
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+              case ConnectionState.waiting:
+                return Center(child: CircularProgressIndicator());
+              default:
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (_, index) =>
+                        RepositoryItem(repository: snapshot.data[index]),
+                  );
+                }
+            }
+          },
+        ));
   }
 }
 
 class RepositoryItem extends StatelessWidget {
+  final Repository repository;
 
-  const RepositoryItem();
+  const RepositoryItem({Key key, this.repository}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
       child: Row(
-        children: <Widget>[
-          Image.network(
-            "https://avatars2.githubusercontent.com/u/5383506?v=4",
-            fit: BoxFit.fill,
-            width: 50.0,
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("Titulo"),
-                  SizedBox(height: 6.0),
-                  Text("Descripcion"),
-                ],
-              ),
+        children: [
+          CircleAvatar(
+            radius: 30.0,
+            backgroundImage: NetworkImage(
+              repository.avatarUrl,
             ),
           ),
-          Row(
-            children: <Widget>[
-              BulletColumn(icon: Icons.star, count: 123),
-              BulletColumn(icon: Icons.print, count: 345),
-              BulletColumn(icon: Icons.add, count: 678),
-            ],
+          Expanded(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Text(
+                            repository.owner,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(
+                            height: 8.0,
+                          ),
+                          Text(
+                            repository.name,
+                            style: TextStyle(color: Colors.blueGrey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: <Widget>[
+                        BulletColumn(
+                          icon: Icons.stars,
+                          count: repository.stars,
+                          color: Colors.amber,
+                        ),
+                        BulletColumn(
+                          icon: Icons.call_split,
+                          count: repository.forks,
+                          color: Colors.blue,
+                        ),
+                        BulletColumn(
+                          icon: Icons.remove_red_eye,
+                          count: repository.watchers,
+                          color: Colors.pink,
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -67,13 +138,11 @@ class RepositoryItem extends StatelessWidget {
 }
 
 class BulletColumn extends StatelessWidget {
-
   final IconData icon;
   final int count;
+  final Color color;
 
-  const BulletColumn({
-    Key key, this.icon, this.count
-  }) : super(key: key);
+  const BulletColumn({Key key, this.icon, this.count, this.color}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -81,8 +150,8 @@ class BulletColumn extends StatelessWidget {
       padding: const EdgeInsets.all(4.0),
       child: Column(
         children: <Widget>[
-          Icon(this.icon),
-          Text(this.count.toString()),
+          Icon(this.icon, color: this.color,),
+          Text(this.count.toString(), style: TextStyle(color: Colors.teal),),
         ],
       ),
     );
