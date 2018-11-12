@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:github_search/domain/repository.dart';
+import 'package:github_search/view/repository_detail_page.dart';
 
 Future<List<Repository>> _getRepositories() async {
   final dio = new Dio();
@@ -74,75 +75,89 @@ class RepositoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 30.0,
-            backgroundImage: NetworkImage(
-              repository.avatarUrl,
+      child: GestureDetector(
+        onTap: () => _goToDetail(context),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 30.0,
+              backgroundImage: NetworkImage(
+                repository.avatarUrl,
+              ),
             ),
-          ),
-          Expanded(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Expanded(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Text(
+                              repository.owner,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(
+                              height: 8.0,
+                            ),
+                            Text(
+                              repository.name,
+                              style: TextStyle(color: Colors.blueGrey),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
                         children: <Widget>[
-                          Text(
-                            repository.owner,
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          BudgeColumn(
+                            icon: Icons.stars,
+                            count: repository.stars,
+                            color: Colors.amber,
                           ),
-                          SizedBox(
-                            height: 8.0,
+                          BudgeColumn(
+                            icon: Icons.call_split,
+                            count: repository.forks,
+                            color: Colors.blue,
                           ),
-                          Text(
-                            repository.name,
-                            style: TextStyle(color: Colors.blueGrey),
+                          BudgeColumn(
+                            icon: Icons.remove_red_eye,
+                            count: repository.watchers,
+                            color: Colors.pink,
                           ),
                         ],
-                      ),
-                    ),
-                    Row(
-                      children: <Widget>[
-                        BulletColumn(
-                          icon: Icons.stars,
-                          count: repository.stars,
-                          color: Colors.amber,
-                        ),
-                        BulletColumn(
-                          icon: Icons.call_split,
-                          count: repository.forks,
-                          color: Colors.blue,
-                        ),
-                        BulletColumn(
-                          icon: Icons.remove_red_eye,
-                          count: repository.watchers,
-                          color: Colors.pink,
-                        ),
-                      ],
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  void _goToDetail(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              RepositoryDetailPage(repository: this.repository)),
     );
   }
 }
 
-class BulletColumn extends StatelessWidget {
+class BudgeColumn extends StatelessWidget {
+
   final IconData icon;
   final int count;
   final Color color;
 
-  const BulletColumn({Key key, this.icon, this.count, this.color}) : super(key: key);
+  const BudgeColumn({Key key, this.icon, this.count, this.color})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -150,8 +165,14 @@ class BulletColumn extends StatelessWidget {
       padding: const EdgeInsets.all(4.0),
       child: Column(
         children: <Widget>[
-          Icon(this.icon, color: this.color,),
-          Text(this.count.toString(), style: TextStyle(color: Colors.teal),),
+          Icon(
+            this.icon,
+            color: this.color,
+          ),
+          Text(
+            this.count.toString(),
+            style: TextStyle(color: Colors.teal),
+          ),
         ],
       ),
     );

@@ -16,6 +16,8 @@ dependencies:
   flutter:
     sdk: flutter
   dio: 1.0.6
+  url_launcher: 4.0.1
+  date_format: 1.0.5
 
 dev_dependencies:
   flutter_test:
