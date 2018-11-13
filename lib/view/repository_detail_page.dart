@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 
 class RepositoryDetailPage extends StatelessWidget {
-
   final Repository repository;
 
   RepositoryDetailPage({this.repository});
@@ -49,29 +48,27 @@ class RepositoryDetailPage extends StatelessWidget {
                 Expanded(
                   child: Column(
                     children: <Widget>[
-                      _buildBadgeItem(
-                          Icons.stars, Colors.amber,
+                      _buildBadgeItem(Icons.stars, Colors.amber,
                           this.repository.stars.toString()),
                       SizedBox(
                         height: 20.0,
                       ),
-                      _buildBadgeItem(
-                          Icons.call_split,
-                          Colors.blueAccent,
+                      _buildBadgeItem(Icons.call_split, Colors.blueAccent,
                           this.repository.forks.toString()),
                       SizedBox(
                         height: 20.0,
                       ),
-                      _buildBadgeItem(
-                          Icons.remove_red_eye,
-                          Colors.pink,
+                      _buildBadgeItem(Icons.remove_red_eye, Colors.pink,
                           this.repository.watchers.toString()),
                     ],
                   ),
                 )
               ],
             ),
-            Divider(color: Colors.blueAccent, height: 2.0,),
+            Divider(
+              color: Colors.blueAccent,
+              height: 2.0,
+            ),
             SizedBox(
               height: 10.0,
             ),
@@ -83,37 +80,35 @@ class RepositoryDetailPage extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text("Languaje"),
-                      Text(this.repository.language),
-                    ],
+                  _buildRowDetail("Languaje", this.repository.language),
+                  SizedBox(
+                    height: 16.0,
                   ),
-                  SizedBox(height: 16.0,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text("Creado"),
-                      Text(formatDate(this.repository.createdAt, [dd, '/', mm, '/', yyyy])),
-                    ],
+                  _buildRowDetail(
+                      "Creado",
+                      formatDate(
+                          this.repository.createdAt, [dd, '/', mm, '/', yyyy])),
+                  SizedBox(
+                    height: 16.0,
                   ),
-                  SizedBox(height: 16.0,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text("Actualizado"),
-                      Text(formatDate(this.repository.updatedAt, [dd, '/', mm, '/', yyyy])),
-                    ],
-                  ),
+                  _buildRowDetail(
+                      "Actualizado",
+                      formatDate(
+                          this.repository.updatedAt, [dd, '/', mm, '/', yyyy])),
                 ],
               ),
             ),
-            Divider(color: Colors.blueAccent, height: 2.0,),
+            Divider(
+              color: Colors.blueAccent,
+              height: 2.0,
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: RaisedButton(
-                child: Text("Ver Repositorio", style: TextStyle(color: Colors.white),),
+                child: Text(
+                  "Ver Repositorio",
+                  style: TextStyle(color: Colors.white, fontSize: 18.0),
+                ),
                 color: Colors.blueAccent,
                 onPressed: _launchRepoURL,
               ),
@@ -121,6 +116,21 @@ class RepositoryDetailPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildRowDetail(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(
+          label,
+          style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w200),
+        ),
+        Text(
+          value,
+        ),
+      ],
     );
   }
 
