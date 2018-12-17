@@ -20,6 +20,10 @@ class RepositoryDetailPage extends StatelessWidget {
             onPressed: _launchRepoURL,
           )
         ],
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Icon(Icons.home),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
